@@ -3,230 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber-X Video Hacker</title>
+    <title>CYBER-X PRO | Ultra-Fast</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600;700&display=swap');
-
-        :root {
-            --glass-bg: rgba(15, 23, 42, 0.7);
-            --accent: #0ea5e9; /* Cyber Blue */
-            --hacker-green: #22c55e;
-        }
-
-        body {
-            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #000000);
-            color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
-            height: 100dvh;
-            overflow: hidden;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;600&display=swap');
+        body { background: #020617; color: #f1f5f9; font-family: 'Inter', sans-serif; height: 100dvh; display: flex; flex-col; overflow: hidden; }
         .mono { font-family: 'Fira Code', monospace; }
-
-        .glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .glass-header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(24px);
-            border-bottom: 1px solid rgba(14, 165, 233, 0.2);
-        }
-
-        .chat-bubble-ai {
-            background: rgba(30, 41, 59, 0.7);
-            border-left: 3px solid var(--accent);
-        }
-
-        .chat-bubble-user {
-            background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
-        }
-
-        .input-glow:focus {
-            outline: none;
-            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
-            border-color: var(--accent);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: rgba(14, 165, 233, 0.3); border-radius: 10px; }
-
-        .loading-pulse {
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(14, 165, 233, 0.2); }
+        .chat-container { scroll-behavior: smooth; }
+        /* Markdown code blocks styling */
+        pre { background: #111827 !important; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; overflow-x: auto; border: 1px solid #1e293b; }
+        code { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+        .ai-bubble p { margin-bottom: 0.75rem; }
     </style>
 </head>
-<body class="flex flex-col">
+<body>
 
-    <header class="glass-header p-4 z-20 shrink-0">
-        <div class="flex justify-between items-center mb-3">
+    <header class="glass p-4 shrink-0 flex flex-col gap-3">
+        <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                <h1 class="text-lg font-bold tracking-tight mono text-sky-400">CYBER-X <span class="text-white">v3.0</span></h1>
+                <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span></span>
+                <h1 class="font-bold mono text-sky-400 tracking-widest text-sm">CYBER-X_PRO_EXTRACTOR</h1>
             </div>
-            <button id="settingsBtn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-sky-500/20 transition-all text-sky-400">
-                <i class="fa-solid fa-microchip text-xl"></i>
-            </button>
+            <button id="settingsBtn" class="text-sky-400 hover:rotate-90 transition-transform duration-300"><i class="fa-solid fa-gear text-xl"></i></button>
         </div>
         
         <div class="flex gap-2">
-            <div class="relative flex-1">
-                <input type="text" id="ytUrl" placeholder="Enter Target YouTube URL..." 
-                       class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm mono input-glow transition-all">
-            </div>
-            <button id="loadBtn" class="bg-sky-600 hover:bg-sky-500 text-white px-5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 active:scale-95">
-                <i class="fa-solid fa-terminal"></i> <span>LOAD</span>
-            </button>
+            <input type="text" id="ytUrl" placeholder="Target URL..." class="flex-1 bg-black/50 border border-sky-900/50 rounded-lg px-3 py-2 text-xs mono text-sky-300 focus:outline-none focus:border-sky-500">
+            <button id="loadBtn" class="bg-sky-600 hover:bg-sky-500 px-4 rounded-lg text-xs font-bold mono">LOAD</button>
         </div>
     </header>
 
-    <main id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-6">
-        <div class="flex flex-col items-start max-w-[90%]">
-            <div class="text-[10px] mono text-sky-500 mb-1 ml-1 uppercase tracking-widest">System Initialize</div>
-            <div class="chat-bubble-ai glass p-4 rounded-2xl rounded-tl-none shadow-xl text-sm leading-relaxed">
-                <p class="mono text-emerald-400 mb-2">>> Connection Established.</p>
-                I am your Cyber-X Assistant. Specialized in <span class="text-sky-400 font-bold">Ethical Hacking</span>, <span class="text-sky-400 font-bold">Advanced Coding</span>, and <span class="text-sky-400 font-bold">Server Architecture</span>.
-                <br><br>
-                Paste a technical video link above to extract intelligence.
-            </div>
-        </div>
-    </main>
+    <main id="chatContainer" class="flex-1 overflow-y-auto p-4 space-y-4 chat-container"></main>
 
-    <div id="typingIndicator" class="px-6 py-2 hidden">
-        <div class="flex items-center gap-2 text-sky-500 mono text-xs">
-            <i class="fa-solid fa-circle-notch animate-spin"></i>
-            <span>Processing Data...</span>
-        </div>
+    <div id="fileStatus" class="hidden px-4 py-1 bg-sky-900/20 border-t border-sky-500/30 text-[10px] mono text-sky-400 flex items-center gap-2">
+        <i class="fa-solid fa-file-code animate-pulse"></i> <span id="fileName">file_attached.txt</span>
+        <button onclick="clearFile()" class="ml-auto text-red-400">REMOVE</button>
     </div>
 
-    <footer class="p-4 bg-gradient-to-t from-black to-transparent">
-        <form id="chatForm" class="relative max-w-4xl mx-auto">
-            <input type="text" id="chatInput" placeholder="Send a command or ask a question..." autocomplete="off"
-                   class="w-full bg-slate-900/80 border border-white/10 rounded-2xl pl-5 pr-14 py-4 text-sm input-glow shadow-2xl">
-            <button type="submit" id="sendBtn" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-sky-600 hover:bg-sky-500 text-white rounded-xl flex items-center justify-center transition-all">
-                <i class="fa-solid fa-paper-plane"></i>
+    <footer class="p-3 bg-slate-950 border-t border-white/5 shadow-2xl">
+        <div class="flex items-center gap-2 max-w-4xl mx-auto">
+            <input type="file" id="fileInput" class="hidden">
+            <button id="attachBtn" class="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-900 border border-white/10 text-sky-400 hover:bg-slate-800 transition-all">
+                <i class="fa-solid fa-paperclip text-lg"></i>
             </button>
-        </form>
+            
+            <div class="flex-1 relative">
+                <input type="text" id="chatInput" placeholder="Analyze code, server or video..." class="w-full bg-slate-900 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:border-sky-500">
+                <button id="sendBtn" class="absolute right-1.5 top-1.5 w-8 h-8 bg-sky-600 hover:bg-sky-500 rounded-lg text-white transition-all"><i class="fa-solid fa-arrow-up"></i></button>
+            </div>
+        </div>
     </footer>
 
-    <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-6">
-        <div class="glass w-full max-w-md rounded-3xl p-8 border-sky-500/30 shadow-[0_0_50px_rgba(14,165,233,0.15)]">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold mono text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gears text-sky-500"></i> CONFIG_CORE
-                </h2>
-                <button id="closeSettings" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-2xl"></i></button>
-            </div>
-            
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs mono text-sky-500 uppercase mb-2">OpenRouter API Key</label>
-                    <input type="password" id="apiKey" placeholder="sk-or-v1-..." 
-                           class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm mono input-glow">
-                </div>
-                <div>
-                    <label class="block text-xs mono text-sky-500 uppercase mb-2">LLM Model Identifier</label>
-                    <input type="text" id="modelName" placeholder="e.g. google/gemini-2.0-flash-001" 
-                           class="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-sm mono input-glow">
-                </div>
-                <button id="saveSettings" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-sky-900/20 transition-all active:scale-95">
-                    SAVE CONFIGURATION
-                </button>
-            </div>
+    <div id="settingsModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-6">
+        <div class="glass w-full max-w-xs rounded-2xl p-6">
+            <h2 class="mono text-sky-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> ACCESS_CONTROL</h2>
+            <input type="password" id="apiKey" placeholder="OpenRouter API Key" class="w-full bg-black border border-sky-900 p-3 rounded-lg mb-3 text-xs mono">
+            <input type="text" id="modelName" placeholder="Model (e.g., deepseek/deepseek-r1:free)" class="w-full bg-black border border-sky-900 p-3 rounded-lg mb-4 text-xs mono">
+            <button id="saveConfig" class="w-full bg-sky-600 py-3 rounded-lg font-bold mono text-sm">INIT_SAVE</button>
         </div>
     </div>
 
     <script>
         let videoContext = "";
+        let fileContext = "";
         let chatHistory = [];
-        const container = document.getElementById('chatContainer');
+        const chatContainer = document.getElementById('chatContainer');
 
-        // Logic to toggle settings
-        const settingsModal = document.getElementById('settingsModal');
-        document.getElementById('settingsBtn').onclick = () => settingsModal.classList.remove('hidden');
-        document.getElementById('closeSettings').onclick = () => settingsModal.classList.add('hidden');
+        // File Attachment Logic
+        const fileInput = document.getElementById('fileInput');
+        document.getElementById('attachBtn').onclick = () => fileInput.click();
 
-        // Persistence
-        window.onload = () => {
-            document.getElementById('apiKey').value = localStorage.getItem('hacker_key') || "";
-            document.getElementById('modelName').value = localStorage.getItem('hacker_model') || "google/gemini-2.0-flash-001";
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('fileStatus').classList.remove('hidden');
+            document.getElementById('fileName').innerText = file.name.toUpperCase();
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                fileContext = `[ATTACHED_FILE: ${file.name}]\nCONTENT:\n${event.target.result}`;
+                addMessage("SYSTEM", `File **${file.name}** has been ingested into local memory buffers.`, "ai");
+            };
+            reader.readAsText(file);
         };
 
-        document.getElementById('saveSettings').onclick = () => {
-            localStorage.setItem('hacker_key', document.getElementById('apiKey').value);
-            localStorage.setItem('hacker_model', document.getElementById('modelName').value);
-            settingsModal.classList.add('hidden');
-            addMessage("System", "Configuration updated. Cryptographic keys stored.", "ai");
+        function clearFile() {
+            fileContext = "";
+            fileInput.value = "";
+            document.getElementById('fileStatus').classList.add('hidden');
+        }
+
+        // Settings Logic
+        document.getElementById('settingsBtn').onclick = () => document.getElementById('settingsModal').classList.toggle('hidden');
+        document.getElementById('saveConfig').onclick = () => {
+            localStorage.setItem('or_key', document.getElementById('apiKey').value);
+            localStorage.setItem('or_model', document.getElementById('modelName').value);
+            document.getElementById('settingsModal').classList.add('hidden');
+        };
+
+        window.onload = () => {
+            document.getElementById('apiKey').value = localStorage.getItem('or_key') || "";
+            document.getElementById('modelName').value = localStorage.getItem('or_model') || "google/gemini-2.0-flash-001";
+            addMessage("CYBER-X", "System Ready. Upload a file or load a URL to begin analysis.", "ai");
         };
 
         function addMessage(sender, text, type) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex flex-col ${type === 'user' ? 'items-end' : 'items-start'} max-w-[95%] ${type === 'user' ? 'ml-auto' : ''}`;
-            
-            const label = type === 'user' ? 'Authorized User' : sender;
-            const bubbleClass = type === 'user' ? 'chat-bubble-user rounded-tr-none' : 'chat-bubble-ai rounded-tl-none';
-
-            wrapper.innerHTML = `
-                <div class="text-[10px] mono text-slate-500 mb-1 mx-1 uppercase tracking-tighter">${label}</div>
-                <div class="${bubbleClass} p-4 rounded-2xl shadow-xl text-sm leading-relaxed whitespace-pre-wrap">${text}</div>
+            const div = document.createElement('div');
+            div.className = `flex flex-col ${type === 'user' ? 'items-end' : 'items-start'}`;
+            div.innerHTML = `
+                <span class="text-[9px] mono text-slate-500 mb-1 uppercase">${sender}</span>
+                <div class="${type === 'user' ? 'bg-sky-700 text-white' : 'glass ai-bubble'} p-3 rounded-xl max-w-[90%] text-sm shadow-lg">
+                    ${type === 'user' ? text : marked.parse(text)}
+                </div>
             `;
-            container.appendChild(wrapper);
-            container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+            chatContainer.appendChild(div);
+            chatContainer.scrollTo(0, chatContainer.scrollHeight);
+            hljs.highlightAll();
+            return div.querySelector('.ai-bubble');
         }
 
-        // Fetch Transcript via Jina
+        // Jina API Fetch
         document.getElementById('loadBtn').onclick = async () => {
             const url = document.getElementById('ytUrl').value;
-            if(!url) return alert("Enter URL first!");
-
-            document.getElementById('loadBtn').innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i>`;
-            addMessage("System", `Initiating Jina-Reader intercept on: ${url}`, "ai");
-
+            if(!url) return;
+            document.getElementById('loadBtn').innerText = "...";
             try {
                 const res = await fetch(`https://r.jina.ai/${url}`);
                 videoContext = await res.text();
-                addMessage("System", "Intelligence extracted. Video transcript cached in local memory. You may now perform analysis.", "ai");
+                addMessage("SYSTEM", "Data Stream Intercepted. Video content is now in context memory.", "ai");
             } catch (e) {
-                addMessage("System", "Failed to intercept video data. Check URL or Jina API status.", "ai");
-            } finally {
-                document.getElementById('loadBtn').innerHTML = `<i class="fa-solid fa-terminal"></i> <span>LOAD</span>`;
+                addMessage("SYSTEM", "Intercept failed. Resource unreachable.", "ai");
             }
+            document.getElementById('loadBtn').innerText = "LOAD";
         };
 
-        // Handle Chat
-        document.getElementById('chatForm').onsubmit = async (e) => {
-            e.preventDefault();
+        // Stream Execution Logic (Fast Processing)
+        document.getElementById('sendBtn').onclick = async () => {
             const input = document.getElementById('chatInput');
-            const query = input.value.trim();
-            const key = localStorage.getItem('hacker_key');
-            const model = localStorage.getItem('hacker_model');
+            const userMsg = input.value.trim();
+            const key = localStorage.getItem('or_key');
+            const model = localStorage.getItem('or_model');
 
-            if(!query) return;
-            if(!key) return alert("Config missing: API Key required.");
-
-            addMessage("User", query, "user");
+            if(!userMsg || !key) return;
+            
+            addMessage("USER", userMsg, "user");
             input.value = "";
-            document.getElementById('typingIndicator').classList.remove('hidden');
 
-            // The Powerful System Prompt for the AI Identity
-            const systemPrompt = `You are "CYBER-X", an elite Cyber Security Expert, Ethical Hacker, and Master Level Programmer. 
-            CONTEXT: The following is a transcript of a YouTube video the user is analyzing: 
-            --- 
-            ${videoContext} 
-            ---
-            YOUR CORE RULES:
-            1. Analyze the context above with extreme technical precision.
-            2. If asked about code, provide high-performance, secure, and optimized solutions.
-            3. If asked about hacking, explain the methodology from an ethical/educational perspective (penetration testing, defense, vulnerability research).
-            4. You are an expert in all languages (Python, C++, Rust, Go, JS, etc.) and server configs (Nginx, Docker, Kubernetes, Linux Hardening).
-            5. Use a professional, slightly 'hacker-style' technical tone.`;
+            // Dynamic Response Bubble for Streaming
+            const aiBubble = addMessage("CYBER-X", "...", "ai");
+            let fullAiResponse = "";
+
+            const systemPrompt = `You are a Cyber Security, Coding & Server Architecture Specialist. 
+            YT_CONTEXT: ${videoContext}
+            FILE_CONTEXT: ${fileContext}
+            Task: Provide ultra-fast, high-precision technical responses. Use Markdown for code.`;
 
             try {
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -236,27 +173,42 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        "model": model,
-                        "messages": [
-                            {"role": "system", "content": systemPrompt},
+                        model: model,
+                        stream: true, // Speed optimization
+                        messages: [
+                            {role: "system", content: systemPrompt},
                             ...chatHistory,
-                            {"role": "user", "content": query}
+                            {role: "user", content: userMsg}
                         ]
                     })
                 });
 
-                const data = await response.json();
-                const aiMsg = data.choices[0].message.content;
-                
-                document.getElementById('typingIndicator').classList.add('hidden');
-                addMessage("CYBER-X", aiMsg, "ai");
-                
-                chatHistory.push({"role": "user", "content": query});
-                chatHistory.push({"role": "assistant", "content": aiMsg});
-                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                const content = data.choices[0].delta.content || "";
+                                fullAiResponse += content;
+                                aiBubble.innerHTML = marked.parse(fullAiResponse);
+                                hljs.highlightAll(); // Live highlighting
+                                chatContainer.scrollTo(0, chatContainer.scrollHeight);
+                            } catch (e) {}
+                        }
+                    }
+                }
+                chatHistory.push({role: "user", content: userMsg}, {role: "assistant", content: fullAiResponse});
             } catch (err) {
-                document.getElementById('typingIndicator').classList.add('hidden');
-                addMessage("System", "Error: API connection timed out or rejected.", "ai");
+                aiBubble.innerText = "CRITICAL_ERROR: Pipeline Broken.";
             }
         };
     </script>
