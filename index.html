@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYBER-X V7 | Tactical Intelligence & Preview</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+
+<style>
+
+body{
+background:#010409;
+color:#c9d1d9;
+height:100dvh;
+display:flex;
+flex-direction:column;
+overflow:hidden;
+font-family:Inter
+}
+
+.mono{font-family:Fira Code,monospace}
+
+.glass{
+background:rgba(13,17,23,.95);
+border:1px solid rgba(48,54,61,.8)
+}
+
+.ai-bubble{
+background:#161b22;
+border-left:3px solid #38bdf8
+}
+
+.user-bubble{
+background:#0c4a6e
+}
+
+#mainWrapper{
+flex:1;
+display:flex;
+overflow:hidden
+}
+
+#chatPanel{
+flex:1;
+display:flex;
+flex-direction:column
+}
+
+#previewPanel{
+flex:1;
+background:#fff;
+display:none;
+flex-direction:column
+}
+
+pre{
+background:#0d1117;
+border-radius:12px;
+padding:16px;
+margin:12px 0;
+position:relative
+}
+
+.preview-btn{
+position:absolute;
+top:8px;
+right:8px;
+background:#38bdf8;
+color:black;
+font-size:10px;
+padding:4px 8px;
+border-radius:4px
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header class="glass p-4 flex justify-between">
+
+<span class="mono text-sky-400">Cyber-X V7_PREVIEW</span>
+
+<div class="flex gap-4">
+
+<button id="togglePreview"
+class="text-sky-500 text-xs mono border px-2 py-1 rounded">
+TOGGLE_VIEW
+</button>
+
+<button id="settingsBtn">
+<i class="fa-solid fa-gear"></i>
+</button>
+
+</div>
+
+</header>
+
+
+<div id="mainWrapper">
+
+<section id="chatPanel">
+
+<main id="chatContainer"
+class="flex-1 overflow-y-auto p-4 space-y-6"></main>
+
+
+<footer class="p-4 glass">
+
+<div class="flex gap-2">
+
+<input type="file" id="fileUploadInput" hidden>
+
+<button id="attachBtn"
+class="bg-slate-900 p-3 rounded">
+<i class="fa-solid fa-paperclip"></i>
+</button>
+
+<input id="chatInput"
+class="flex-1 bg-slate-900 rounded p-3"
+placeholder="Analyze or request code...">
+
+<button id="sendBtn"
+class="bg-sky-600 p-3 rounded">
+<i class="fa-solid fa-paper-plane"></i>
+</button>
+
+</div>
+
+</footer>
+
+</section>
+
+
+<section id="previewPanel">
+
+<div class="bg-black text-white p-2 flex justify-between">
+
+<span>Preview</span>
+
+<button onclick="closePreview()">✕</button>
+
+</div>
+
+<iframe id="previewFrame"
+class="flex-1"></iframe>
+
+</section>
+
+</div>
+
+
+<div id="settingsModal"
+class="fixed inset-0 bg-black/95 hidden
+flex items-center justify-center">
+
+<div class="glass p-8 w-80">
+
+<input id="apiKeyInput"
+placeholder="OpenRouter API Key"
+class="w-full p-3 mb-3 bg-black border rounded">
+
+<input id="modelInput"
+placeholder="Primary Model"
+class="w-full p-3 mb-3 bg-black border rounded">
+
+<input id="modelBackup"
+placeholder="Backup Model"
+class="w-full p-3 mb-4 bg-black border rounded">
+
+<button id="saveConfig"
+class="bg-sky-600 w-full p-3 rounded">
+SAVE
+</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+let fileData=""
+let chatHistory=[]
+
+const chatBox=document.getElementById("chatContainer")
+const previewPanel=document.getElementById("previewPanel")
+const previewFrame=document.getElementById("previewFrame")
+
+
+const renderer=new marked.Renderer()
+
+renderer.code=function(code,language){
+
+const runBtn=`<button class="preview-btn"
+onclick="runInPreview(\`${encodeURIComponent(code)}\`)">
+RUN CODE
+</button>`
+
+return `<pre>${runBtn}<code>${code}</code></pre>`
+
+}
+
+marked.setOptions({renderer})
+
+
+window.onload=()=>{
+
+document.getElementById("apiKeyInput").value=
+localStorage.getItem("cx_key")||""
+
+document.getElementById("modelInput").value=
+localStorage.getItem("cx_model")||
+"google/gemini-2.0-flash-001"
+
+document.getElementById("modelBackup").value=
+localStorage.getItem("cx_model_backup")||
+"deepseek/deepseek-chat"
+
+addMessage("CYBER-X",
+"System Ready. Preview Engine: ONLINE.",
+"ai")
+
+}
+
+
+document.getElementById("settingsBtn").onclick=()=>{
+
+document.getElementById("settingsModal")
+.classList.remove("hidden")
+
+}
+
+
+document.getElementById("saveConfig").onclick=()=>{
+
+localStorage.setItem(
+"cx_key",
+document.getElementById("apiKeyInput").value
+)
+
+localStorage.setItem(
+"cx_model",
+document.getElementById("modelInput").value
+)
+
+localStorage.setItem(
+"cx_model_backup",
+document.getElementById("modelBackup").value
+)
+
+document.getElementById("settingsModal")
+.classList.add("hidden")
+
+}
+
+
+
+function addMessage(sender,text,type){
+
+const div=document.createElement("div")
+
+div.className=
+`flex flex-col ${type==="user"?"items-end":"items-start"}`
+
+div.innerHTML=`
+<span class="text-xs mono">${sender}</span>
+
+<div class="p-4 rounded-xl
+${type==="user"?"user-bubble":"ai-bubble"}">
+
+${type==="user"?text:marked.parse(text)}
+
+</div>`
+
+chatBox.appendChild(div)
+
+chatBox.scrollTop=chatBox.scrollHeight
+
+return div.querySelector("div")
+
+}
+
+
+
+function runInPreview(encoded){
+
+const code=decodeURIComponent(encoded)
+
+previewPanel.style.display="flex"
+
+let html=code
+
+if(!code.startsWith("<")){
+html=`<html><body><script>${code}<\/script></body></html>`
+}
+
+previewFrame.srcdoc=html
+
+}
+
+
+
+function closePreview(){
+previewPanel.style.display="none"
+}
+
+
+
+async function callAI(model,msg,prompt){
+
+return fetch(
+"https://openrouter.ai/api/v1/chat/completions",
+{
+
+method:"POST",
+
+headers:{
+Authorization:`Bearer ${localStorage.getItem("cx_key")}`,
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+model:model,
+stream:true,
+
+messages:[
+{role:"system",content:prompt},
+...chatHistory,
+{role:"user",content:msg}
+]
+
+})
+
+})
+
+}
+
+
+
+document.getElementById("sendBtn").onclick=async()=>{
+
+const input=document.getElementById("chatInput")
+
+const msg=input.value.trim()
+
+if(!msg)return
+
+addMessage("USER",msg,"user")
+
+input.value=""
+
+const aiBody=addMessage("CYBER-X","...","ai")
+
+let accumulated=""
+
+const modelPrimary=localStorage.getItem("cx_model")
+const modelBackup=localStorage.getItem("cx_model_backup")
+
+const prompt=`You are an elite Cyber & Full-stack Architect.
+Context:${fileData}`
+
+
+let response
+
+try{
+
+response=await callAI(modelPrimary,msg,prompt)
+
+if(!response.ok) throw new Error()
+
+}catch{
+
+response=await callAI(modelBackup,msg,prompt)
+
+}
+
+
+const reader=response.body.getReader()
+const decoder=new TextDecoder()
+
+
+while(true){
+
+const {done,value}=await reader.read()
+
+if(done)break
+
+const chunk=decoder.decode(value)
+
+const lines=chunk.split("\n")
+
+for(const line of lines){
+
+if(line.startsWith("data: ")){
+
+try{
+
+const data=JSON.parse(line.slice(6))
+
+accumulated+=
+data.choices[0].delta.content||""
+
+aiBody.innerHTML=
+marked.parse(accumulated)
+
+}catch{}
+
+}
+
+}
+
+}
+
+chatHistory.push(
+{role:"user",content:msg},
+{role:"assistant",content:accumulated}
+)
+
+}
+
+</script>
+
+</body>
+</html>
