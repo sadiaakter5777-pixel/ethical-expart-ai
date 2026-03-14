@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CYBER-X Dev Platform</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs/loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+body{background:#020617;color:#e2e8f0;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#workspace{flex:1;display:flex}
+#files{width:200px;border-right:1px solid #334155;overflow:auto;padding:8px}
+#editor{flex:1}
+#chat{width:320px;border-left:1px solid #334155;display:flex;flex-direction:column}
+#chatBox{flex:1;overflow:auto;padding:10px}
+.user{background:#075985;padding:8px;border-radius:6px;margin-bottom:6px;margin-left:auto;max-width:90%}
+.ai{background:#111827;padding:8px;border-radius:6px;margin-bottom:6px;max-width:90%}
+#preview{position:fixed;top:0;left:0;width:100%;height:100%;background:white;display:none;flex-direction:column;z-index:999}
+</style>
+</head>
+
+<body>
+
+<header class="bg-black p-3 flex justify-between">
+<span>CYBER-X Platform</span>
+
+<div class="flex gap-2">
+<button onclick="runProject()" class="bg-green-600 px-3 rounded">RUN</button>
+<button onclick="newFile()" class="bg-sky-600 px-3 rounded">NEW</button>
+<button onclick="importZip()" class="bg-purple-600 px-3 rounded">ZIP</button>
+<button onclick="openConfig()" class="bg-gray-700 px-3 rounded">CONFIG</button>
+</div>
+</header>
+
+<div id="workspace">
+<div id="files"></div>
+<div id="editor"></div>
+
+<div id="chat">
+<div id="chatBox"></div>
+
+<div class="p-2 flex gap-1">
+<input id="chatInput" class="flex-1 bg-black p-2 rounded" placeholder="Ask AI">
+<button onclick="sendChat()" class="bg-sky-600 px-3 rounded">Send</button>
+</div>
+</div>
+</div>
+
+<div id="preview">
+<div class="bg-black text-white p-2 flex justify-between">
+<span>PREVIEW</span>
+<button onclick="closePreview()">✕</button>
+</div>
+<iframe id="previewFrame" style="flex:1;border:0"></iframe>
+</div>
+
+<div id="configPanel" class="fixed inset-0 hidden bg-black/90 flex items-center justify-center">
+<div class="bg-gray-900 p-6 rounded w-96 space-y-2">
+
+<h2 class="text-lg">CONFIG</h2>
+
+<input id="or_key" placeholder="OpenRouter API Key" class="w-full p-2 bg-black border rounded">
+<input id="or_model" placeholder="AI Model" class="w-full p-2 bg-black border rounded">
+
+<input id="firebase_api" placeholder="Firebase API Key" class="w-full p-2 bg-black border rounded">
+<input id="firebase_project" placeholder="Firebase Project ID" class="w-full p-2 bg-black border rounded">
+
+<input id="backend_url" placeholder="Backend API URL" class="w-full p-2 bg-black border rounded">
+<input id="github_token" placeholder="GitHub Token" class="w-full p-2 bg-black border rounded">
+
+<button onclick="saveConfig()" class="bg-sky-600 w-full p-2 rounded">SAVE</button>
+
+</div>
+</div>
+
+<script>
+
+let files={
+"index.html":"<h1>Hello CYBER-X</h1>",
+"style.css":"body{font-family:sans-serif}",
+"script.js":"console.log('CYBER-X')"
+}
+
+let currentFile="index.html"
+let editor
+let chatHistory=[]
+
+require.config({paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.44.0/min/vs'}})
+
+require(["vs/editor/editor.main"],function(){
+
+editor=monaco.editor.create(document.getElementById("editor"),{
+value:files[currentFile],
+language:"html",
+theme:"vs-dark",
+automaticLayout:true
+})
+
+editor.onDidChangeModelContent(()=>{
+files[currentFile]=editor.getValue()
+})
+
+})
+
+function renderFiles(){
+const list=document.getElementById("files")
+list.innerHTML=""
+for(const f in files){
+const d=document.createElement("div")
+d.innerText=f
+d.className="p-1 cursor-pointer"
+d.onclick=()=>{
+currentFile=f
+editor.setValue(files[f])
+}
+list.appendChild(d)
+}
+}
+
+renderFiles()
+
+function newFile(){
+const name=prompt("File name")
+if(!name)return
+files[name]=""
+renderFiles()
+}
+
+function runProject(){
+
+let html=files["index.html"]||""
+let css=files["style.css"]||""
+let js=files["script.js"]||""
+
+const full=`<html>
+<head><style>${css}</style></head>
+<body>${html}<script>${js}<\/script></body>
+</html>`
+
+document.getElementById("preview").style.display="flex"
+document.getElementById("previewFrame").srcdoc=full
+}
+
+function closePreview(){
+document.getElementById("preview").style.display="none"
+}
+
+async function importZip(){
+
+const input=document.createElement("input")
+input.type="file"
+
+input.onchange=async e=>{
+const zip=await JSZip.loadAsync(e.target.files[0])
+
+for(const name in zip.files){
+const content=await zip.files[name].async("string")
+files[name]=content
+}
+
+renderFiles()
+}
+
+input.click()
+}
+
+function openConfig(){
+document.getElementById("configPanel").classList.remove("hidden")
+}
+
+function saveConfig(){
+localStorage.setItem("or_key",document.getElementById("or_key").value)
+localStorage.setItem("or_model",document.getElementById("or_model").value)
+localStorage.setItem("backend_url",document.getElementById("backend_url").value)
+localStorage.setItem("github_token",document.getElementById("github_token").value)
+document.getElementById("configPanel").classList.add("hidden")
+}
+
+function addMessage(text,type){
+const div=document.createElement("div")
+div.className=type
+div.innerHTML=type==="user"?text:marked.parse(text)
+document.getElementById("chatBox").appendChild(div)
+return div
+}
+
+async function sendChat(){
+
+const msg=document.getElementById("chatInput").value
+addMessage(msg,"user")
+document.getElementById("chatInput").value=""
+
+const ai=addMessage("...","ai")
+
+const key=localStorage.getItem("or_key")
+const model=localStorage.getItem("or_model")
+
+const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+method:"POST",
+headers:{
+Authorization:"Bearer "+key,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+model:model,
+messages:[
+...chatHistory,
+{role:"user",content:msg}
+]
+})
+})
+
+const data=await res.json()
+
+const reply=data.choices[0].message.content
+ai.innerHTML=marked.parse(reply)
+
+chatHistory.push(
+{role:"user",content:msg},
+{role:"assistant",content:reply}
+)
+
+}
+
+</script>
+
+</body>
+</html>
